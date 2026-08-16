@@ -1,0 +1,213 @@
+// Kameti — Prisma schema
+// Mirrors the shapes already defined in src/types/index.ts and src/mocks/data.ts,
+// so the frontend and agent tools can move from mock data to a real database
+// without changing any UI code.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum CommitteeStatus {
+  active
+  needs_attention
+  completed
+  paused
+}
+
+enum PaymentStatus {
+  paid
+  pending
+  overdue
+  under_review
+  disputed
+}
+
+enum DecisionStatus {
+  pending
+  approved
+  resolved
+  dismissed
+}
+
+enum EventSeverity {
+  info
+  warning
+  error
+  success
+}
+
+enum Frequency {
+  monthly
+  weekly
+  biweekly
+}
+
+enum MemberLanguage {
+  english
+  urdu
+  hindi
+}
+
+enum AgentEventType {
+  PAYMENT_RECEIVED
+  PAYMENT_OVERDUE
+  REMINDER_SENT
+  DECISION_REQUIRED
+  DECISION_RESOLVED
+  CYCLE_COMPLETED
+  RECEIPT_VERIFIED
+  CYCLE_MONITORED
+  MEMBER_ADDED
+}
+
+model Committee {
+  id                  String          @id @default(cuid())
+  name                String
+  contributionAmount  Int
+  frequency           Frequency
+  totalCycles         Int
+  currentCycle        Int
+  status              CommitteeStatus @default(active)
+  nextRecipientId     String?
+  deadline            DateTime?
+  potCollected        Int             @default(0)
+  potExpected         Int             @default(0)
+  paymentsReceived    Int             @default(0)
+  createdAt           DateTime        @default(now())
+
+  members       Member[]
+  payments      Payment[]
+  rotation      RotationEntry[]
+  agentActions  AgentAction[]
+  decisions     Decision[]
+  notifications Notification[]
+}
+
+model Member {
+  id              String         @id @default(cuid())
+  committeeId     String
+  committee       Committee      @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+  name            String
+  phone           String?
+  language        MemberLanguage @default(english)
+  contribution    Int
+  cyclesCompleted Int            @default(0)
+  onTimeCount     Int            @default(0)
+  lateCount       Int            @default(0)
+  missedCount     Int            @default(0)
+  currentStatus   PaymentStatus  @default(pending)
+  memberSince     DateTime       @default(now())
+  avatar          String?
+
+  payments       Payment[]
+  paymentRecords CyclePaymentRecord[]
+
+  @@index([committeeId])
+}
+
+model CyclePaymentRecord {
+  id          String        @id @default(cuid())
+  memberId    String
+  member      Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  cycleNumber Int
+  status      String // 'paid' | 'late' | 'missed' | 'pending'
+  date        DateTime?
+
+  @@index([memberId])
+}
+
+model RotationEntry {
+  id           String    @id @default(cuid())
+  committeeId  String
+  committee    Committee @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+  cycleNumber  Int
+  memberId     String
+  memberName   String
+  amount       Int
+  status       String // 'completed' | 'current' | 'upcoming'
+  date         DateTime?
+
+  @@index([committeeId])
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  committeeId     String
+  committee       Committee     @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+  cycleId         String?
+  memberId        String
+  member          Member        @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  memberName      String
+  expectedAmount  Int
+  receivedAmount  Int?
+  status          PaymentStatus @default(pending)
+  submittedAt     DateTime?
+  verifiedAt      DateTime?
+  reference       String?
+  receiptUrl      String?
+  method          String?
+  verifiedBy      String?
+  notes           String?
+
+  @@index([committeeId])
+  @@index([memberId])
+}
+
+model AgentAction {
+  id            String         @id @default(cuid())
+  committeeId   String
+  committee     Committee      @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+  cycleId       String?
+  memberId      String?
+  type          AgentEventType
+  title         String
+  description   String
+  why           String?
+  outcome       String?
+  severity      EventSeverity  @default(info)
+  timestamp     DateTime       @default(now())
+  requiresHuman Boolean        @default(false)
+  decisionId    String?
+
+  @@index([committeeId])
+}
+
+model Decision {
+  id              String         @id @default(cuid())
+  committeeId     String
+  committee       Committee      @relation(fields: [committeeId], references: [id], onDelete: Cascade)
+  committeeName   String
+  cycleId         String?
+  cycleNumber     Int?
+  type            String
+  title           String
+  description     String
+  recommendation  String
+  evidence        Json
+  status          DecisionStatus @default(pending)
+  createdAt       DateTime       @default(now())
+  resolvedAt      DateTime?
+  resolution      String?
+
+  @@index([committeeId])
+}
+
+model Notification {
+  id          String        @id @default(cuid())
+  committeeId String?
+  committee   Committee?    @relation(fields: [committeeId], references: [id], onDelete: SetNull)
+  type        String // 'decision' | 'payment' | 'cycle' | 'reminder' | 'system'
+  title       String
+  description String
+  severity    EventSeverity @default(info)
+  read        Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+  actionUrl   String?
+
+  @@index([committeeId])
+}
