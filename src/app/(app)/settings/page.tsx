@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User, Bell, Bot, Globe, Shield } from 'lucide-react';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
@@ -8,27 +8,39 @@ import { useApp } from '@/context/AppContext';
 
 type SettingsSection = 'profile' | 'notifications' | 'agent' | 'language' | 'security';
 
-const sections: { id: SettingsSection; label: string; icon: React.ReactNode }[] = [
-  { id: 'profile', label: 'Profile', icon: <User size={16} /> },
-  { id: 'notifications', label: 'Notifications', icon: <Bell size={16} /> },
-  { id: 'agent', label: 'Agent preferences', icon: <Bot size={16} /> },
-  { id: 'language', label: 'Language', icon: <Globe size={16} /> },
-  { id: 'security', label: 'Security & trust', icon: <Shield size={16} /> },
+const sections: { id: SettingsSection; key: 'profile' | 'notifications' | 'agent' | 'language' | 'security'; icon: React.ReactNode }[] = [
+  { id: 'profile', key: 'profile', icon: <User size={16} /> },
+  { id: 'notifications', key: 'notifications', icon: <Bell size={16} /> },
+  { id: 'agent', key: 'agent', icon: <Bot size={16} /> },
+  { id: 'language', key: 'language', icon: <Globe size={16} /> },
+  { id: 'security', key: 'security', icon: <Shield size={16} /> },
 ];
 
 function ProfileSection() {
-  const { addToast } = useApp();
+  const { organizerProfile, updateOrganizerProfile } = useApp();
+  const [name, setName] = useState(organizerProfile.name);
+  const [email, setEmail] = useState(organizerProfile.email);
+  const [phone, setPhone] = useState(organizerProfile.phone);
+
+  // Keep the form in sync if the profile loads/changes after this component
+  // has already mounted (e.g. the localStorage read finishing after first render).
+  useEffect(() => {
+    setName(organizerProfile.name);
+    setEmail(organizerProfile.email);
+    setPhone(organizerProfile.phone);
+  }, [organizerProfile]);
+
   return (
     <div className="space-y-5">
       <div>
         <h3 className="text-[16px] font-semibold text-kameti-text mb-4">Profile</h3>
         <div className="space-y-4">
-          <Input label="Full name" defaultValue="Raza Ahmed" />
-          <Input label="Email" defaultValue="raza@example.com" type="email" />
-          <Input label="Phone" defaultValue="+92 300 0000000" />
+          <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
+          <Input label="Email" value={email} onChange={(e) => setEmail(e.target.value)} type="email" />
+          <Input label="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
         </div>
       </div>
-      <Button variant="primary" onClick={() => { }}>Save changes</Button>
+      <Button variant="primary" onClick={() => updateOrganizerProfile({ name, email, phone })}>Save changes</Button>
     </div>
   );
 }
@@ -129,19 +141,19 @@ function AgentSection() {
 }
 
 function LanguageSection() {
-  const [lang, setLang] = useState('english');
+  const { language, setLanguage } = useApp();
   return (
     <div className="space-y-5">
       <h3 className="text-[16px] font-semibold text-kameti-text mb-4">Language</h3>
       <div className="space-y-2">
         {[
-          { value: 'english', label: 'English' },
-          { value: 'urdu', label: 'اردو' },
-          { value: 'hindi', label: 'हिन्दी' },
+          { value: 'english' as const, label: 'English' },
+          { value: 'urdu' as const, label: 'اردو' },
+          { value: 'hindi' as const, label: 'हिन्दी' },
         ].map(l => (
-          <label key={l.value} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${lang === l.value ? 'border-primary bg-primary-light' : 'border-kameti-border hover:bg-kameti-bg'}`}>
-            <input type="radio" name="language" value={l.value} checked={lang === l.value} onChange={() => setLang(l.value)} className="text-primary" />
-            <span className={`text-[14px] font-medium ${lang === l.value ? 'text-primary-dark' : 'text-kameti-text'}`}>{l.label}</span>
+          <label key={l.value} className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all ${language === l.value ? 'border-primary bg-primary-light' : 'border-kameti-border hover:bg-kameti-bg'}`}>
+            <input type="radio" name="language" value={l.value} checked={language === l.value} onChange={() => setLanguage(l.value)} className="text-primary" />
+            <span className={`text-[14px] font-medium ${language === l.value ? 'text-primary-dark' : 'text-kameti-text'}`}>{l.label}</span>
           </label>
         ))}
       </div>
@@ -173,6 +185,7 @@ function SecuritySection() {
 
 export default function SettingsPage() {
   const [activeSection, setActiveSection] = useState<SettingsSection>('profile');
+  const { t } = useApp();
 
   const contentMap: Record<SettingsSection, React.ReactNode> = {
     profile: <ProfileSection />,
@@ -185,8 +198,8 @@ export default function SettingsPage() {
   return (
     <div className="p-8 max-w-[900px] mx-auto">
       <div className="mb-6">
-        <h2 className="text-[24px] font-bold text-kameti-text">Settings</h2>
-        <p className="text-[14px] text-kameti-text-secondary mt-1">Manage your preferences and account.</p>
+        <h2 className="text-[24px] font-bold text-kameti-text">{t.settingsPage.title}</h2>
+        <p className="text-[14px] text-kameti-text-secondary mt-1">{t.settingsPage.subtitle}</p>
       </div>
 
       <div className="flex flex-col md:flex-row gap-6">
@@ -204,7 +217,7 @@ export default function SettingsPage() {
                 }`}
               >
                 <span className={activeSection === s.id ? 'text-primary' : 'text-kameti-text-muted'}>{s.icon}</span>
-                {s.label}
+                {t.settingsPage.sections[s.key]}
               </button>
             ))}
           </nav>

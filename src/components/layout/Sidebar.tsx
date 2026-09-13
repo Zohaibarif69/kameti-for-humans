@@ -14,19 +14,20 @@ import {
   TriangleAlert,
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { isRtl } from '../../lib/i18n';
 import Avatar from '../ui/Avatar';
 
 const navItems = [
-  { label: 'Overview', icon: LayoutDashboard, path: '/dashboard' },
-  { label: 'Committees', icon: UsersRound, path: '/committees' },
-  { label: 'Payments', icon: CircleDollarSign, path: '/payments' },
-  { label: 'Agent Activity', icon: Bot, path: '/agent' },
-  { label: 'Members', icon: Activity, path: '/members' },
+  { label: 'Overview', key: 'overview' as const, icon: LayoutDashboard, path: '/dashboard' },
+  { label: 'Committees', key: 'committees' as const, icon: UsersRound, path: '/committees' },
+  { label: 'Payments', key: 'payments' as const, icon: CircleDollarSign, path: '/payments' },
+  { label: 'Agent Activity', key: 'agentActivity' as const, icon: Bot, path: '/agent' },
+  { label: 'Members', key: 'members' as const, icon: Activity, path: '/members' },
 ];
 
 const bottomNavItems = [
-  { label: 'Settings', icon: Settings, path: '/settings' },
-  { label: 'Help & Support', icon: CircleHelp, path: '/help' },
+  { label: 'Settings', key: 'settings' as const, icon: Settings, path: '/settings' },
+  { label: 'Help & Support', key: 'help' as const, icon: CircleHelp, path: '/help' },
 ];
 
 interface SidebarProps {
@@ -35,8 +36,9 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ mobile, onClose }: SidebarProps) {
-  const { pendingDecisionsCount } = useApp();
+  const { pendingDecisionsCount, organizerProfile, t, language } = useApp();
   const pathname = usePathname();
+  const dir = isRtl(language) ? 'rtl' : 'ltr';
 
   const NavItem = ({ item }: { item: typeof navItems[0] }) => {
     const isActive = pathname === item.path || pathname.startsWith(item.path + '/');
@@ -54,7 +56,7 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
         aria-current={isActive ? 'page' : undefined}
       >
         <Icon size={17} className={isActive ? 'text-primary' : 'text-kameti-text-muted group-hover:text-kameti-text-secondary'} />
-        {item.label}
+        {t.nav[item.key]}
         {item.path === '/agent' && pendingDecisionsCount > 0 && (
           <span className="ml-auto w-5 h-5 rounded-full bg-warning text-white text-[11px] font-bold flex items-center justify-center">
             {pendingDecisionsCount}
@@ -65,13 +67,13 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
   };
 
   return (
-    <nav className="w-[240px] h-full bg-white border-r border-kameti-border flex flex-col" aria-label="Main navigation">
+    <nav dir={dir} className="w-[240px] h-full bg-white border-r border-kameti-border flex flex-col" aria-label="Main navigation">
       {/* Logo */}
       <div className="px-5 py-5 border-b border-kameti-border">
-        <div className="flex items-center gap-2.5">
+        <Link href="/" onClick={mobile ? onClose : undefined} className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold text-[15px]">K</div>
           <span className="text-[16px] font-bold text-primary-dark tracking-tight">KAMETI</span>
-        </div>
+        </Link>
       </div>
 
       {/* Main nav */}
@@ -89,7 +91,7 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
             }`}
           >
             <TriangleAlert size={17} />
-            Decisions
+            {t.nav.decisions}
             <span className="ml-auto w-5 h-5 rounded-full bg-warning text-white text-[11px] font-bold flex items-center justify-center">
               {pendingDecisionsCount}
             </span>
@@ -117,7 +119,7 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
               }`}
             >
               <Icon size={17} className={isActive ? 'text-primary' : 'text-kameti-text-muted group-hover:text-kameti-text-secondary'} />
-              {item.label}
+              {t.nav[item.key]}
             </Link>
           );
         })}
@@ -126,10 +128,10 @@ export default function Sidebar({ mobile, onClose }: SidebarProps) {
       {/* User */}
       <div className="px-4 py-4 border-t border-kameti-border">
         <div className="flex items-center gap-3">
-          <Avatar name="Organizer" size="sm" />
+          <Avatar name={organizerProfile.name} size="sm" />
           <div className="min-w-0">
-            <p className="text-[13px] font-semibold text-kameti-text truncate">Raza Ahmed</p>
-            <p className="text-[12px] text-kameti-text-muted">Organizer</p>
+            <p className="text-[13px] font-semibold text-kameti-text truncate">{organizerProfile.name}</p>
+            <p className="text-[12px] text-kameti-text-muted">{t.organizerRole}</p>
           </div>
         </div>
       </div>

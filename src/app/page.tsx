@@ -9,15 +9,15 @@ function HeroSection() {
   return (
     <section className="relative overflow-hidden bg-white">
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary-light via-white to-white opacity-60" />
-      <div className="relative max-w-5xl mx-auto px-5 sm:px-8 py-14 sm:py-20 lg:py-24 text-center">
-        <div className="inline-flex items-center gap-2 bg-primary-light border border-primary/20 rounded-full px-3 sm:px-4 py-1.5 mb-6 sm:mb-8">
+      <div className="relative max-w-5xl mx-auto px-5 sm:px-8 py-10 sm:py-12 lg:py-14 text-center">
+        <div className="inline-flex items-center gap-2 bg-primary-light border border-primary/20 rounded-full px-3 sm:px-4 py-1.5 mb-4 sm:mb-5">
           <div className="w-1.5 h-1.5 rounded-full bg-primary status-dot-active" />
           <span className="text-[12px] sm:text-[13px] font-medium text-primary">AI-powered committee coordination</span>
         </div>
-        <h1 className="text-[32px] sm:text-[42px] lg:text-[52px] leading-[1.15] font-bold text-primary-dark mb-4 sm:mb-6 max-w-2xl mx-auto">
+        <h1 className="text-[28px] sm:text-[36px] lg:text-[44px] leading-[1.15] font-bold text-primary-dark mb-3 sm:mb-4 max-w-2xl mx-auto">
           Keep the trust.<br />Automate the coordination.
         </h1>
-        <p className="text-[15px] sm:text-[17px] lg:text-[18px] text-kameti-text-secondary max-w-xl mx-auto mb-8 sm:mb-10 leading-relaxed">
+        <p className="text-[14px] sm:text-[16px] lg:text-[17px] text-kameti-text-secondary max-w-xl mx-auto mb-6 sm:mb-7 leading-relaxed">
           Kameti quietly manages the repetitive work behind your community savings circle — so you can focus on the people.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -34,28 +34,28 @@ function HeroSection() {
         </div>
 
         {/* Mock dashboard preview */}
-        <div className="mt-12 sm:mt-16 rounded-xl sm:rounded-2xl border border-kameti-border overflow-hidden shadow-2xl" style={{ boxShadow: '0 24px 80px rgba(20,35,28,0.12)' }}>
-          <div className="bg-kameti-surface-2 px-4 py-2.5 sm:py-3 flex items-center gap-2 border-b border-kameti-border">
+        <div className="mt-8 sm:mt-10 rounded-xl sm:rounded-2xl border border-kameti-border overflow-hidden shadow-2xl" style={{ boxShadow: '0 24px 80px rgba(20,35,28,0.12)' }}>
+          <div className="bg-kameti-surface-2 px-4 py-2 sm:py-2.5 flex items-center gap-2 border-b border-kameti-border">
             <div className="w-2.5 h-2.5 rounded-full bg-danger/40" />
             <div className="w-2.5 h-2.5 rounded-full bg-warning/40" />
             <div className="w-2.5 h-2.5 rounded-full bg-success/40" />
             <span className="text-[11px] sm:text-[12px] text-kameti-text-muted mx-auto">kameti.app/dashboard</span>
           </div>
-          <div className="bg-kameti-bg p-4 sm:p-6 text-left">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-3 sm:mb-4">
+          <div className="bg-kameti-bg p-3 sm:p-4 text-left">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-2.5 sm:mb-3">
               {[
                 { val: '3', sub: 'Active' },
                 { val: 'Rs.475k', sub: 'Collected' },
                 { val: '2', sub: 'Pending' },
                 { val: '1', sub: 'Decision' },
               ].map((s, i) => (
-                <div key={i} className="bg-white rounded-lg border border-kameti-border p-2.5 sm:p-3">
-                  <p className="text-[16px] sm:text-[18px] font-bold text-kameti-text">{s.val}</p>
+                <div key={i} className="bg-white rounded-lg border border-kameti-border p-2 sm:p-2.5">
+                  <p className="text-[15px] sm:text-[17px] font-bold text-kameti-text">{s.val}</p>
                   <p className="text-[10px] sm:text-[11px] text-kameti-text-muted">{s.sub}</p>
                 </div>
               ))}
             </div>
-            <div className="bg-warning-bg border border-warning/20 rounded-lg p-2.5 sm:p-3 flex items-start gap-2.5 sm:gap-3">
+            <div className="bg-warning-bg border border-warning/20 rounded-lg p-2 sm:p-2.5 flex items-start gap-2.5 sm:gap-3">
               <div className="w-2 h-2 rounded-full bg-warning mt-1 shrink-0" />
               <div>
                 <p className="text-[12px] sm:text-[13px] font-semibold text-warning">1 decision requires your attention</p>

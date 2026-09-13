@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Bot, TriangleAlert, CheckCircle, Circle, Menu } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { isRtl } from '../../lib/i18n';
 import Avatar from '../ui/Avatar';
 import { formatRelativeTime } from '../../mocks/data';
 
@@ -52,7 +53,7 @@ function AgentStatusPanel({ onClose }: { onClose: () => void }) {
 }
 
 function NotificationsPanel({ onClose }: { onClose: () => void }) {
-  const { notifications, markNotificationRead, markAllNotificationsRead } = useApp();
+  const { notifications, markNotificationRead, markAllNotificationsRead, t, language } = useApp();
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -79,16 +80,16 @@ function NotificationsPanel({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div ref={ref} className="absolute right-0 top-full mt-2 w-[320px] sm:w-80 bg-white rounded-xl border border-kameti-border shadow-xl z-50 overflow-hidden fade-in" style={{ boxShadow: '0 12px 40px rgba(20,35,28,0.10)' }}>
+    <div ref={ref} dir={isRtl(language) ? 'rtl' : 'ltr'} className="absolute right-0 top-full mt-2 w-[320px] sm:w-80 bg-white rounded-xl border border-kameti-border shadow-xl z-50 overflow-hidden fade-in" style={{ boxShadow: '0 12px 40px rgba(20,35,28,0.10)' }}>
       <div className="flex items-center justify-between px-4 py-3 border-b border-kameti-border">
-        <span className="text-[14px] font-semibold text-kameti-text">Notifications</span>
+        <span className="text-[14px] font-semibold text-kameti-text">{t.topbar.notifications}</span>
         <button onClick={markAllNotificationsRead} className="text-[12px] text-primary hover:text-primary-dark font-medium transition-colors">
-          Mark all read
+          {t.topbar.markAllRead}
         </button>
       </div>
       <div className="max-h-80 sm:max-h-96 overflow-y-auto divide-y divide-kameti-border">
         {notifications.length === 0 ? (
-          <div className="py-8 text-center text-[13px] text-kameti-text-muted">No notifications</div>
+          <div className="py-8 text-center text-[13px] text-kameti-text-muted">{t.topbar.noNotifications}</div>
         ) : (
           notifications.map(notif => {
             const Icon = icons[notif.type];
@@ -115,13 +116,13 @@ function NotificationsPanel({ onClose }: { onClose: () => void }) {
 }
 
 export default function TopBar({ title, breadcrumb, onMenuOpen }: TopBarProps) {
-  const { unreadCount, agentStatus } = useApp();
+  const { unreadCount, agentStatus, organizerProfile, t } = useApp();
   const [agentOpen, setAgentOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
 
-  const statusLabel = agentStatus.status === 'active' ? 'Agent Active' :
-    agentStatus.status === 'monitoring' ? 'Monitoring' :
-    agentStatus.status === 'needs_attention' ? 'Attention needed' : 'Agent offline';
+  const statusLabel = agentStatus.status === 'active' ? t.topbar.agentActive :
+    agentStatus.status === 'monitoring' ? t.topbar.monitoring :
+    agentStatus.status === 'needs_attention' ? t.topbar.attentionNeeded : t.topbar.agentOffline;
   const statusDot = agentStatus.status === 'active' ? 'bg-success' :
     agentStatus.status === 'needs_attention' ? 'bg-warning' :
     agentStatus.status === 'offline' ? 'bg-danger' : 'bg-info';
@@ -175,7 +176,7 @@ export default function TopBar({ title, breadcrumb, onMenuOpen }: TopBarProps) {
         </div>
 
         {/* Avatar */}
-        <Avatar name="Raza Ahmed" size="sm" className="hidden sm:flex" />
+        <Avatar name={organizerProfile.name} size="sm" className="hidden sm:flex" />
       </div>
     </header>
   );
