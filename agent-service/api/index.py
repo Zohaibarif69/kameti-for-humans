@@ -24,12 +24,15 @@ from the Next.js app's own /api routes, and for the alternative of running
 it on Render/Railway/Fly instead.
 """
 
+import asyncio
 import json
 import os
+import queue
+import threading
 from typing import Optional
 
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 from google import genai
 from strands import Agent, tool
 from strands.models.gemini import GeminiModel
@@ -159,18 +162,25 @@ def get_committee_status(committee_id: str) -> dict:
     """Fetch the current status of a committee: its cycle progress, pot totals, and every
     member with their current payment status for this cycle. Use this first, before deciding
     whether reminders or escalation are needed."""
-    return _internal_get("/api/internal/committee-status", {"committeeId": committee_id})
+    print(f"\n🔎 [AGENT] Checking committee status for {committee_id}...")
+    result = _internal_get("/api/internal/committee-status", {"committeeId": committee_id})
+    print(f"   -> status retrieved: {json.dumps(result)[:300]}")
+    return result
 
 
 @tool
 def send_reminder(committee_id: str, member_id: str, message: str) -> dict:
     """Send a polite WhatsApp payment reminder to a specific committee member. Use this for
     members who have not yet paid this cycle, before escalating to the human organizer."""
-    return _internal_post("/api/internal/send-reminder", {
+    print(f"\n📤 [AGENT DECISION] Sending WhatsApp reminder to member {member_id}")
+    print(f"   Message: \"{message}\"")
+    result = _internal_post("/api/internal/send-reminder", {
         "committeeId": committee_id,
         "memberId": member_id,
         "message": message,
     })
+    print(f"   -> reminder sent")
+    return result
 
 
 @tool
@@ -179,7 +189,8 @@ def record_payment(committee_id: str, member_id: str, amount: float, method: str
     """Record a confirmed, verified payment from a member for the current cycle. Only call this
     after the amount has been confirmed (e.g. via verify_receipt) — this updates the committee pot
     and the member's on-time/late counters."""
-    return _internal_post("/api/internal/record-payment", {
+    print(f"\n✅ [AGENT DECISION] Recording confirmed payment: member {member_id}, amount {amount}")
+    result = _internal_post("/api/internal/record-payment", {
         "committeeId": committee_id,
         "memberId": member_id,
         "amount": amount,
@@ -187,6 +198,8 @@ def record_payment(committee_id: str, member_id: str, amount: float, method: str
         "reference": reference,
         "wasLate": was_late,
     })
+    print(f"   -> payment recorded, pot updated")
+    return result
 
 
 @tool
@@ -197,6 +210,9 @@ def raise_decision(committee_id: str, committee_name: str, type: str, title: str
     wrong, or a member requesting to leave). Never use this for routine, in-policy actions —
     handle those yourself with the other tools. Always include your reasoning as evidence and a
     clear, specific recommendation."""
+    print(f"\n🚨 [AGENT DECISION] Escalating to human organizer: \"{title}\"")
+    print(f"   Reason: {description}")
+    print(f"   Recommendation: {recommendation}")
     return _internal_post("/api/internal/raise-decision", {
         "committeeId": committee_id,
         "committeeName": committee_name,
@@ -215,7 +231,10 @@ def advance_cycle(committee_id: str) -> dict:
     out the current rotation entry, activates the next recipient, and resets payment status for
     the new cycle. This will refuse and explain why if anyone still owes money — check
     get_committee_status first."""
-    return _internal_post("/api/internal/advance-cycle", {"committeeId": committee_id})
+    print(f"\n🔄 [AGENT DECISION] Advancing committee {committee_id} to next cycle")
+    result = _internal_post("/api/internal/advance-cycle", {"committeeId": committee_id})
+    print(f"   -> cycle advanced")
+    return result
 
 
 @tool
@@ -225,8 +244,12 @@ def verify_receipt(image_url: str, expected_amount: float) -> dict:
     matches. Use the result to decide your next step yourself: if it clearly matches, call
     record_payment; if it looks wrong, unclear, or suspicious, call raise_decision instead of
     guessing."""
+    print(f"\n🖼️  [AGENT] Verifying receipt image (expecting {expected_amount})...")
     try:
-        return _run_receipt_vision(image_url, expected_amount)
+        result = _run_receipt_vision(image_url, expected_amount)
+        print(f"   -> Gemini read: amount={result.get('detectedAmount')}, "
+              f"confidence={result.get('confidence')}, matches={result.get('matches')}")
+        return result
     except Exception as error:  # noqa: BLE001 — surfaced to the agent as a tool result, not raised
         return {
             "matches": False,
@@ -259,6 +282,75 @@ def _check_secret() -> bool:
 
 
 # ---------------------------------------------------------------------------
+# Live streaming — bridges Strands' async event stream (agent.stream_async)
+# to a synchronous generator Flask can yield from as Server-Sent Events.
+# This forwards the agent's *actual* reasoning as it happens (text deltas and
+# tool calls as they're chosen), not a replay of a finished response — the
+# frontend renders exactly what arrives here, live.
+#
+# Note: Strands' exact event dict shape can vary slightly by SDK version.
+# _event_to_sse below reads the common keys defensively; if your installed
+# version differs, check this service's terminal output (each raw event is
+# still printed) and adjust the key names below to match.
+# ---------------------------------------------------------------------------
+
+_SENTINEL = object()
+
+
+def _stream_agent_events(agent: Agent, prompt: str):
+    """Runs agent.stream_async on a background thread with its own event
+    loop, pushing each event into a thread-safe queue this generator reads
+    from synchronously — necessary because Flask's dev server is sync but
+    Strands' streaming API is async."""
+    q: "queue.Queue" = queue.Queue()
+
+    def _runner():
+        async def _consume():
+            try:
+                async for event in agent.stream_async(prompt):
+                    q.put(event)
+            except Exception as exc:  # noqa: BLE001 — surfaced to the client, not raised
+                q.put({"error": str(exc)})
+            finally:
+                q.put(_SENTINEL)
+
+        asyncio.run(_consume())
+
+    threading.Thread(target=_runner, daemon=True).start()
+
+    while True:
+        item = q.get()
+        if item is _SENTINEL:
+            return
+        yield item
+
+
+def _event_to_sse(event: dict) -> Optional[str]:
+    """Converts one raw Strands stream event into an SSE line for the
+    browser. Forwards whatever meaningful content is present rather than
+    assuming one exact schema."""
+    print(f"   [stream event] {str(event)[:200]}")
+    payload = None
+
+    if isinstance(event, dict):
+        if event.get("error"):
+            payload = {"type": "error", "text": event["error"]}
+        elif event.get("data"):
+            payload = {"type": "text", "text": event["data"]}
+        elif event.get("current_tool_use", {}).get("name"):
+            payload = {"type": "tool_call", "name": event["current_tool_use"]["name"]}
+        elif isinstance(event.get("message"), dict):
+            for block in event["message"].get("content", []) or []:
+                if isinstance(block, dict) and block.get("text"):
+                    payload = {"type": "text", "text": block["text"]}
+                    break
+
+    if payload is None:
+        return None
+    return f"data: {json.dumps(payload)}\n\n"
+
+
+# ---------------------------------------------------------------------------
 # HTTP surface — called by the Next.js app instead of it running the agent
 # in-process. Mirrors src/app/api/agent/run/route.ts's manual-trigger and
 # cron paths, plus the Twilio webhook's text-reply path.
@@ -275,6 +367,7 @@ def run_endpoint():
     current_cycle = body.get("currentCycle")
     total_cycles = body.get("totalCycles")
 
+    print(f"\n{'='*60}\n🤖 AGENT RUN STARTING — committee: {committee_name} (cycle {current_cycle}/{total_cycles})\n{'='*60}")
     agent = _build_agent()
     prompt = (
         f'Check committee "{committee_name}" (id: {committee_id}), cycle {current_cycle} of '
@@ -283,7 +376,49 @@ def run_endpoint():
         f"everyone has paid, consider calling advance_cycle."
     )
     result = agent(prompt)
+    print(f"\n{'='*60}\n✅ AGENT RUN COMPLETE\nFinal reasoning: {str(result)}\n{'='*60}\n")
     return jsonify({"ok": True, "summary": str(result)})
+
+
+@app.route("/api/run/stream", methods=["POST"])
+def run_stream_endpoint():
+    """Same job as /api/run, but streams the agent's reasoning live as
+    Server-Sent Events instead of waiting for the whole turn to finish."""
+    if not _check_secret():
+        return jsonify({"error": "Unauthorized"}), 401
+
+    body = request.get_json(force=True)
+    committee_name = body["committeeName"]
+    committee_id = body["committeeId"]
+    current_cycle = body.get("currentCycle")
+    total_cycles = body.get("totalCycles")
+
+    prompt = (
+        f'Check committee "{committee_name}" (id: {committee_id}), cycle {current_cycle} of '
+        f'{total_cycles}. Take whatever actions are appropriate: send reminders to members '
+        f"who haven't paid, or raise a decision if something needs the organizer's attention. If "
+        f"everyone has paid, consider calling advance_cycle."
+    )
+
+    def generate():
+        print(f"\n{'='*60}\n🤖 AGENT STREAM STARTING — {committee_name}\n{'='*60}")
+        agent = _build_agent()
+        yield f"data: {json.dumps({'type': 'start', 'text': f'Checking {committee_name}…'})}\n\n"
+        try:
+            for event in _stream_agent_events(agent, prompt):
+                sse_line = _event_to_sse(event)
+                if sse_line:
+                    yield sse_line
+        except Exception as exc:  # noqa: BLE001
+            yield f"data: {json.dumps({'type': 'error', 'text': str(exc)})}\n\n"
+        print(f"{'='*60}\n✅ AGENT STREAM COMPLETE\n{'='*60}\n")
+        yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+    return Response(
+        generate(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
+    )
 
 
 @app.route("/api/message", methods=["POST"])
