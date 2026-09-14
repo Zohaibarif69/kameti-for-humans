@@ -13,6 +13,13 @@ import type {
   AgentStatusInfo,
   ToastMessage,
 } from '../types';
+import { translations, type AppLanguage, type Translations } from '../lib/i18n';
+
+interface OrganizerProfile {
+  name: string;
+  email: string;
+  phone: string;
+}
 
 interface AppContextValue {
   committees: Committee[];
@@ -58,6 +65,11 @@ interface AppContextValue {
   resetDemo: () => void;
   unreadCount: number;
   pendingDecisionsCount: number;
+  organizerProfile: OrganizerProfile;
+  updateOrganizerProfile: (input: Partial<OrganizerProfile>) => void;
+  language: AppLanguage;
+  setLanguage: (language: AppLanguage) => void;
+  t: Translations;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -97,6 +109,43 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isDemoMode] = useState(true);
   const [demoStep, setDemoStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [language, setLanguage] = useState<AppLanguage>('english');
+  const [organizerProfile, setOrganizerProfile] = useState<OrganizerProfile>({
+    name: 'Zohaib Arif',
+    email: 'zohaib@example.com',
+    phone: '+92 300 0000000',
+  });
+
+  const t = translations[language];
+
+  useEffect(() => {
+    const savedLanguage = window.localStorage.getItem('kameti-language');
+    if (savedLanguage && savedLanguage in translations) {
+      setLanguage(savedLanguage as AppLanguage);
+    }
+
+    const savedProfile = window.localStorage.getItem('kameti-organizer-profile');
+    if (savedProfile) {
+      try {
+        setOrganizerProfile((current) => ({ ...current, ...JSON.parse(savedProfile) }));
+      } catch {
+        window.localStorage.removeItem('kameti-organizer-profile');
+      }
+    }
+  }, []);
+
+  const handleSetLanguage = useCallback((nextLanguage: AppLanguage) => {
+    setLanguage(nextLanguage);
+    window.localStorage.setItem('kameti-language', nextLanguage);
+  }, []);
+
+  const updateOrganizerProfile = useCallback((input: Partial<OrganizerProfile>) => {
+    setOrganizerProfile((current) => {
+      const nextProfile = { ...current, ...input };
+      window.localStorage.setItem('kameti-organizer-profile', JSON.stringify(nextProfile));
+      return nextProfile;
+    });
+  }, []);
 
   const addToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
     const id = Math.random().toString(36).slice(2);
@@ -408,6 +457,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         resetDemo,
         unreadCount,
         pendingDecisionsCount,
+        organizerProfile,
+        updateOrganizerProfile,
+        language,
+        setLanguage: handleSetLanguage,
+        t,
       }}
     >
       {children}
