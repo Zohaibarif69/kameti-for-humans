@@ -13,7 +13,6 @@ import type {
   AgentStatusInfo,
   ToastMessage,
 } from '../types';
-import { translations, type AppLanguage, type Translations } from '../lib/i18n';
 
 interface AppContextValue {
   committees: Committee[];
@@ -28,11 +27,6 @@ interface AppContextValue {
   isDemoMode: boolean;
   demoStep: number;
   isLoading: boolean;
-  organizerProfile: OrganizerProfile;
-  updateOrganizerProfile: (input: Partial<OrganizerProfile>) => void;
-  language: AppLanguage;
-  setLanguage: (language: AppLanguage) => void;
-  t: Translations;
   addToast: (toast: Omit<ToastMessage, 'id'>) => void;
   removeToast: (id: string) => void;
   markNotificationRead: (id: string) => void;
@@ -58,7 +52,7 @@ interface AppContextValue {
   ) => void;
   deleteCommittee: (committeeId: string) => void;
   deleteMember: (memberId: string) => void;
-  runAgentCheck: () => Promise<void>;
+  runAgentCheck: () => Promise<{ ran: number; results: Array<{ committeeId: string; name: string; ok: boolean; summary?: string; error?: string }> } | null>;
   refresh: () => Promise<void>;
   advanceDemoStep: () => void;
   resetDemo: () => void;
@@ -67,38 +61,6 @@ interface AppContextValue {
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
-
-interface OrganizerProfile {
-  name: string;
-  email: string;
-  phone: string;
-}
-
-const ORGANIZER_PROFILE_STORAGE_KEY = 'kameti:organizerProfile';
-const LANGUAGE_STORAGE_KEY = 'kameti:language';
-
-function loadLanguage(): AppLanguage {
-  if (typeof window === 'undefined') return 'english';
-  const raw = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
-  return raw === 'urdu' || raw === 'hindi' || raw === 'english' ? raw : 'english';
-}
-
-const defaultOrganizerProfile: OrganizerProfile = {
-  name: 'Zohaib Arif',
-  email: 'zohaib@example.com',
-  phone: '+92 300 0000000',
-};
-
-function loadOrganizerProfile(): OrganizerProfile {
-  if (typeof window === 'undefined') return defaultOrganizerProfile;
-  try {
-    const raw = window.localStorage.getItem(ORGANIZER_PROFILE_STORAGE_KEY);
-    if (!raw) return defaultOrganizerProfile;
-    return { ...defaultOrganizerProfile, ...JSON.parse(raw) };
-  } catch {
-    return defaultOrganizerProfile;
-  }
-}
 
 const emptyAgentStatus: AgentStatusInfo = {
   status: 'monitoring',
@@ -135,52 +97,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [isDemoMode] = useState(true);
   const [demoStep, setDemoStep] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [organizerProfile, setOrganizerProfile] = useState<OrganizerProfile>(defaultOrganizerProfile);
-  const [language, setLanguageState] = useState<AppLanguage>('english');
-
-  // Loaded in an effect (not lazy useState init) so server-rendered and first-client-render
-  // HTML match — localStorage isn't available during server rendering.
-  useEffect(() => {
-    setOrganizerProfile(loadOrganizerProfile());
-    setLanguageState(loadLanguage());
-  }, []);
 
   const addToast = useCallback((toast: Omit<ToastMessage, 'id'>) => {
     const id = Math.random().toString(36).slice(2);
     setToasts((prev) => [...prev, { ...toast, id }]);
     setTimeout(() => setToasts((prev) => prev.filter((t) => t.id !== id)), 4000);
   }, []);
-
-  const updateOrganizerProfile = useCallback(
-    (input: Partial<OrganizerProfile>) => {
-      setOrganizerProfile((prev) => {
-        const next = { ...prev, ...input };
-        try {
-          window.localStorage.setItem(ORGANIZER_PROFILE_STORAGE_KEY, JSON.stringify(next));
-        } catch {
-          // Storage can fail (private browsing, quota) — the in-memory update still applies
-          // for the rest of this session even if it doesn't persist across reloads.
-        }
-        return next;
-      });
-      addToast({ type: 'success', title: 'Profile updated', description: 'Your changes have been saved.' });
-    },
-    [addToast],
-  );
-
-  const setLanguage = useCallback(
-    (next: AppLanguage) => {
-      setLanguageState(next);
-      try {
-        window.localStorage.setItem(LANGUAGE_STORAGE_KEY, next);
-      } catch {
-        // Same as updateOrganizerProfile: storage can fail, the in-memory change still applies.
-      }
-      const label = next === 'urdu' ? 'اردو' : next === 'hindi' ? 'हिन्दी' : 'English';
-      addToast({ type: 'success', title: 'Language updated', description: `Switched to ${label}.` });
-    },
-    [addToast],
-  );
 
   const removeToast = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
@@ -427,14 +349,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     try {
       const res = await fetch('/api/agent/run', { method: 'POST' });
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
+      const data = await res.json();
       addToast({ type: 'success', title: 'Agent check complete', description: 'Activity feed updated below.' });
       await refresh();
+      return data as { ran: number; results: Array<{ committeeId: string; name: string; ok: boolean; summary?: string; error?: string }> };
     } catch (error) {
       addToast({
         type: 'error',
         title: 'Agent check failed',
         description: error instanceof Error ? error.message : 'Unknown error',
       });
+      return null;
     }
   }, [addToast, refresh]);
 
@@ -464,11 +389,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         isDemoMode,
         demoStep,
         isLoading,
-        organizerProfile,
-        updateOrganizerProfile,
-        language,
-        setLanguage,
-        t: translations[language],
         addToast,
         removeToast,
         markNotificationRead,

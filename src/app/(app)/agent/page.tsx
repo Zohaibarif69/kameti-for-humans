@@ -75,6 +75,8 @@ function ActivityEntry({ action, isLast }: { action: AgentAction; isLast: boolea
   );
 }
 
+import Button from '@/components/ui/Button';
+
 export default function AgentPage() {
   const { agentActivity, agentStatus, runAgentCheck } = useApp();
   const [isRunning, setIsRunning] = React.useState(false);
@@ -90,9 +92,21 @@ export default function AgentPage() {
 
   return (
     <div className="px-4 py-6 sm:px-6 sm:py-8 lg:px-8 max-w-[900px] mx-auto space-y-6 sm:space-y-8">
-      <div>
-        <h2 className="text-[20px] sm:text-[24px] font-bold text-kameti-text">Kameti Agent</h2>
-        <p className="text-[13px] sm:text-[14px] text-kameti-text-secondary mt-1">Your autonomous committee coordinator.</p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-[20px] sm:text-[24px] font-bold text-kameti-text">Kameti Agent</h2>
+          <p className="text-[13px] sm:text-[14px] text-kameti-text-secondary mt-1">Your autonomous committee coordinator.</p>
+        </div>
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={handleRefresh}
+          loading={isRunning}
+          icon={!isRunning ? <RefreshCw size={16} /> : undefined}
+          className="shrink-0"
+        >
+          {isRunning ? 'Agent is thinking…' : 'Run agent check'}
+        </Button>
       </div>
 
       <AgentStatusHero />
@@ -112,7 +126,7 @@ export default function AgentPage() {
             disabled={isRunning}
             className="flex items-center gap-1.5 text-[13px] text-kameti-text-secondary hover:text-kameti-text transition-colors disabled:opacity-50"
           >
-            <RefreshCw size={13} className={isRunning ? 'animate-spin' : ''} /> {isRunning ? 'Running…' : 'Run agent check'}
+            <RefreshCw size={13} className={isRunning ? 'animate-spin' : ''} /> {isRunning ? 'Running…' : 'Run again'}
           </button>
         </div>
 
@@ -120,7 +134,9 @@ export default function AgentPage() {
           <EmptyState icon={<Bot size={22} />} title="No activity yet" description="Agent actions will appear here as your committee becomes active." />
         ) : (
           <div className="bg-white rounded-xl border border-kameti-border p-4 sm:p-6" style={{ boxShadow: '0 1px 3px rgba(20,35,28,0.06)' }}>
-            <p className="text-[12px] font-semibold text-kameti-text-muted uppercase tracking-wide mb-5">Today — Sep 11, 2026</p>
+            <p className="text-[12px] font-semibold text-kameti-text-muted uppercase tracking-wide mb-5">
+              Today — {new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
             {agentActivity.map((action, i) => (
               <ActivityEntry key={action.id} action={action} isLast={i === agentActivity.length - 1} />
             ))}

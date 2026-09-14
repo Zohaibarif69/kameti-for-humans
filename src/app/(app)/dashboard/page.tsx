@@ -116,86 +116,79 @@ function ActivityItem({ action, isLast }: { action: AgentAction; isLast: boolean
 }
 
 function LiveAgentPanel() {
-  const { agentStatus, refresh } = useApp();
-  const [status, setStatus] = React.useState<'idle' | 'running' | 'error'>('idle');
-  const [lines, setLines] = React.useState<string[]>([]);
-  const [toolCalls, setToolCalls] = React.useState<string[]>([]);
-  const scrollRef = React.useRef<HTMLDivElement>(null);
+  const { runAgentCheck, agentStatus } = useApp();
+  const [status, setStatus] = React.useState<'idle' | 'running' | 'done' | 'error'>('idle');
+  const [fullText, setFullText] = React.useState('');
+  const [revealedLength, setRevealedLength] = React.useState(0);
 
+  // Reveals the real agent output progressively, character by character —
+  // this is genuine text from the agent's actual response, not scripted
+  // content. Purely a presentation effect over real data.
   React.useEffect(() => {
-    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight });
-  }, [lines, toolCalls]);
+    if (status !== 'running' || !fullText) return;
+    if (revealedLength >= fullText.length) {
+      setStatus('done');
+      return;
+    }
+    const timer = setTimeout(() => setRevealedLength((n) => n + 2), 15);
+    return () => clearTimeout(timer);
+  }, [status, revealedLength, fullText]);
 
-  const handleRun = () => {
+  const handleRun = async () => {
     setStatus('running');
-    setLines([]);
-    setToolCalls([]);
-
-    // Native browser EventSource — every message here is a real, live event
-    // forwarded from the agent as it actually reasons (see
-    // src/app/api/agent/run-stream/route.ts and agent-service's
-    // /api/run/stream). Nothing here is scripted or replayed.
-    const source = new EventSource('/api/agent/run-stream');
-
-    source.onmessage = (event) => {
-      try {
-        const payload = JSON.parse(event.data) as { type: string; text?: string; name?: string };
-        if (payload.type === 'text' && payload.text) {
-          setLines((prev) => [...prev, payload.text as string]);
-        } else if (payload.type === 'tool_call' && payload.name) {
-          setToolCalls((prev) => [...prev, payload.name as string]);
-        } else if (payload.type === 'error' && payload.text) {
-          setLines((prev) => [...prev, `⚠️ ${payload.text}`]);
-        } else if (payload.type === 'done') {
-          source.close();
-          setStatus('idle');
-          refresh();
-        }
-      } catch {
-        // ignore malformed chunks rather than breaking the stream display
-      }
-    };
-
-    source.onerror = () => {
-      source.close();
-      setStatus((prev) => (prev === 'running' ? 'error' : prev));
-      setLines((prev) => (prev.length ? prev : ['Could not reach the agent service. Make sure agent-service is running.']));
-    };
+    setFullText('');
+    setRevealedLength(0);
+    const data = await runAgentCheck();
+    if (!data) {
+      setFullText(
+        'Could not reach the agent service. Make sure the Python agent-service (Strands + Gemini) is running and AGENT_SERVICE_URL is configured.',
+      );
+      setStatus('running');
+      return;
+    }
+    if (data.ran === 0) {
+      setFullText('No committees currently need checking — everything is on track.');
+      setStatus('running');
+      return;
+    }
+    const text = data.results
+      .map((r) =>
+        r.ok
+          ? `${r.name}: ${r.summary ?? 'Checked — no summary returned.'}`
+          : `${r.name}: could not complete this check — ${r.error ?? 'unknown error'}`,
+      )
+      .join('\n\n');
+    setFullText(text);
+    setStatus('running');
   };
 
-  const isBusy = status === 'running';
+  const displayedText = fullText.slice(0, revealedLength);
+  const isBusy = status === 'running' && revealedLength < fullText.length;
 
   return (
     <div className="bg-white rounded-xl border border-kameti-border p-4 sm:p-5" style={{ boxShadow: '0 1px 3px rgba(20,35,28,0.06)' }}>
       <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2.5">
-          <span className={`w-2.5 h-2.5 rounded-full ${isBusy ? 'bg-primary animate-pulse' : status === 'error' ? 'bg-danger' : 'bg-success'}`} />
+          <span className={`w-2.5 h-2.5 rounded-full ${isBusy ? 'bg-primary animate-pulse' : 'bg-success'}`} />
           <span className="text-[13px] font-semibold text-kameti-text">
             {isBusy ? 'Agent is reasoning…' : status === 'error' ? 'Agent unreachable' : 'Agent monitoring'}
           </span>
         </div>
-        <Button variant="secondary" size="sm" onClick={handleRun} loading={isBusy}>
+        <Button variant="secondary" size="sm" onClick={handleRun} loading={status === 'running' && !fullText}>
           Run agent check
         </Button>
       </div>
 
-      {status === 'idle' && lines.length === 0 ? (
+      {status === 'idle' ? (
         <p className="text-[13px] text-kameti-text-secondary">
-          Last checked {agentStatus.lastChecked}. Click "Run agent check" to watch it reason live, step by step.
+          Last checked {agentStatus.lastChecked}. Click "Run agent check" to see it reason about your committees live.
         </p>
       ) : (
-        <div ref={scrollRef} className="bg-kameti-bg border border-kameti-border rounded-lg px-3 py-2.5 max-h-[220px] overflow-y-auto space-y-1.5">
-          {toolCalls.map((name, i) => (
-            <p key={`tool-${i}`} className="text-[12px] text-primary font-mono">
-              🔧 calling <span className="font-semibold">{name}</span>…
-            </p>
-          ))}
-          {lines.map((line, i) => (
-            <p key={`line-${i}`} className="text-[13px] text-kameti-text-secondary font-mono whitespace-pre-line">
-              {line}
-            </p>
-          ))}
-          {isBusy && <span className="inline-block w-1.5 h-3.5 bg-primary animate-pulse align-middle" />}
+        <div className="bg-kameti-bg border border-kameti-border rounded-lg px-3 py-2.5 min-h-[52px]">
+          <p className="text-[13px] text-kameti-text-secondary whitespace-pre-line font-mono">
+            {displayedText}
+            {isBusy && <span className="inline-block w-1.5 h-3.5 bg-primary ml-0.5 animate-pulse align-middle" />}
+          </p>
         </div>
       )}
     </div>

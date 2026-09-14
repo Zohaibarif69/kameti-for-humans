@@ -61,6 +61,23 @@ export const mockCommittees: Committee[] = [
     paymentsReceived: 6,
     createdAt: 'Mar 1, 2026',
   },
+  {
+    id: 'c4',
+    name: 'Neighborhood Relief Fund',
+    contributionAmount: 5000,
+    frequency: 'monthly',
+    totalCycles: 12,
+    currentCycle: 3,
+    memberCount: 12,
+    status: 'active',
+    nextRecipientName: 'Nadia',
+    nextRecipientId: 'm35',
+    deadline: 'Sep 20, 2026',
+    potCollected: 55000,
+    potExpected: 60000,
+    paymentsReceived: 11,
+    createdAt: 'Jul 15, 2026',
+  },
 ];
 
 export const mockMembers: Record<string, Member[]> = {
@@ -229,9 +246,36 @@ export const mockMembers: Record<string, Member[]> = {
   c2: [
     { id: 'm11', committeeId: 'c2', name: 'Khalid', phone: '+92 308 1111111', language: 'english', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid', date: 'Jul 15' }, { cycleNumber: 2, status: 'paid', date: 'Aug 15' }] },
     { id: 'm12', committeeId: 'c2', name: 'Sara', phone: '+92 309 2222222', language: 'english', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm13', committeeId: 'c2', name: 'Usman', phone: '+92 309 2222213', language: 'urdu', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm14', committeeId: 'c2', name: 'Ayesha', phone: '+92 309 2222214', language: 'english', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm15', committeeId: 'c2', name: 'Bilal', phone: '+92 309 2222215', language: 'urdu', contribution: 10000, cyclesCompleted: 2, onTimeCount: 1, lateCount: 1, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'late', date: 'Jul 18' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm16', committeeId: 'c2', name: 'Hina', phone: '+92 309 2222216', language: 'urdu', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm17', committeeId: 'c2', name: 'Tariq', phone: '+92 309 2222217', language: 'english', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm18', committeeId: 'c2', name: 'Mariam', phone: '+92 309 2222218', language: 'english', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm19', committeeId: 'c2', name: 'Faisal', phone: '+92 309 2222219', language: 'urdu', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm20', committeeId: 'c2', name: 'Sadia', phone: '+92 309 2222220', language: 'english', contribution: 10000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
   ],
   c3: [
     { id: 'm21', committeeId: 'c3', name: 'Bilal', phone: '+92 310 3333333', language: 'english', contribution: 15000, cyclesCompleted: 6, onTimeCount: 6, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Mar 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }, { cycleNumber: 3, status: 'paid' }, { cycleNumber: 4, status: 'paid' }, { cycleNumber: 5, status: 'paid' }, { cycleNumber: 6, status: 'paid' }] },
+    { id: 'm22', committeeId: 'c3', name: 'Junaid', phone: '+92 310 3333334', language: 'english', contribution: 15000, cyclesCompleted: 6, onTimeCount: 6, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Mar 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }, { cycleNumber: 3, status: 'paid' }, { cycleNumber: 4, status: 'paid' }, { cycleNumber: 5, status: 'paid' }, { cycleNumber: 6, status: 'paid' }] },
+    { id: 'm23', committeeId: 'c3', name: 'Rabia', phone: '+92 310 3333335', language: 'urdu', contribution: 15000, cyclesCompleted: 6, onTimeCount: 5, lateCount: 1, missedCount: 0, currentStatus: 'paid', memberSince: 'Mar 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'late' }, { cycleNumber: 3, status: 'paid' }, { cycleNumber: 4, status: 'paid' }, { cycleNumber: 5, status: 'paid' }, { cycleNumber: 6, status: 'paid' }] },
+    { id: 'm24', committeeId: 'c3', name: 'Waqas', phone: '+92 310 3333336', language: 'english', contribution: 15000, cyclesCompleted: 6, onTimeCount: 6, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Mar 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }, { cycleNumber: 3, status: 'paid' }, { cycleNumber: 4, status: 'paid' }, { cycleNumber: 5, status: 'paid' }, { cycleNumber: 6, status: 'paid' }] },
+    { id: 'm25', committeeId: 'c3', name: 'Sana', phone: '+92 310 3333337', language: 'urdu', contribution: 15000, cyclesCompleted: 6, onTimeCount: 6, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Mar 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }, { cycleNumber: 3, status: 'paid' }, { cycleNumber: 4, status: 'paid' }, { cycleNumber: 5, status: 'paid' }, { cycleNumber: 6, status: 'paid' }] },
+    { id: 'm26', committeeId: 'c3', name: 'Imran', phone: '+92 310 3333338', language: 'english', contribution: 15000, cyclesCompleted: 6, onTimeCount: 6, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Mar 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }, { cycleNumber: 3, status: 'paid' }, { cycleNumber: 4, status: 'paid' }, { cycleNumber: 5, status: 'paid' }, { cycleNumber: 6, status: 'paid' }] },
+  ],
+  c4: [
+    { id: 'm27', committeeId: 'c4', name: 'Nadia', phone: '+92 311 4444401', language: 'urdu', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm28', committeeId: 'c4', name: 'Aslam', phone: '+92 311 4444402', language: 'urdu', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm29', committeeId: 'c4', name: 'Farida', phone: '+92 311 4444403', language: 'urdu', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm30', committeeId: 'c4', name: 'Rashid', phone: '+92 311 4444404', language: 'english', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm31', committeeId: 'c4', name: 'Shazia', phone: '+92 311 4444405', language: 'urdu', contribution: 5000, cyclesCompleted: 2, onTimeCount: 1, lateCount: 1, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'late' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm32', committeeId: 'c4', name: 'Kashif', phone: '+92 311 4444406', language: 'english', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm33', committeeId: 'c4', name: 'Naveed', phone: '+92 311 4444407', language: 'urdu', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm34', committeeId: 'c4', name: 'Iram', phone: '+92 311 4444408', language: 'urdu', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm35', committeeId: 'c4', name: 'Nadia Extra', phone: '+92 311 4444409', language: 'english', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm36', committeeId: 'c4', name: 'Zubair', phone: '+92 311 4444410', language: 'urdu', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm37', committeeId: 'c4', name: 'Alina', phone: '+92 311 4444411', language: 'english', contribution: 5000, cyclesCompleted: 2, onTimeCount: 2, lateCount: 0, missedCount: 0, currentStatus: 'paid', memberSince: 'Jul 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'paid' }] },
+    { id: 'm38', committeeId: 'c4', name: 'Danish', phone: '+92 311 4444412', language: 'urdu', contribution: 5000, cyclesCompleted: 1, onTimeCount: 0, lateCount: 0, missedCount: 0, currentStatus: 'pending', memberSince: 'Aug 2026', paymentHistory: [{ cycleNumber: 1, status: 'paid' }, { cycleNumber: 2, status: 'pending' }] },
   ],
 };
 
@@ -249,6 +293,36 @@ export const mockPayments: Record<string, Payment[]> = {
   c2: [
     { id: 'p11', committeeId: 'c2', cycleId: 'cy21', memberId: 'm11', memberName: 'Khalid', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48260', verifiedBy: 'Kameti Agent' },
     { id: 'p12', committeeId: 'c2', cycleId: 'cy21', memberId: 'm12', memberName: 'Sara', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48261', verifiedBy: 'Kameti Agent' },
+    { id: 'p13', committeeId: 'c2', cycleId: 'cy21', memberId: 'm13', memberName: 'Usman', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48262', verifiedBy: 'Kameti Agent' },
+    { id: 'p14', committeeId: 'c2', cycleId: 'cy21', memberId: 'm14', memberName: 'Ayesha', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48263', verifiedBy: 'Kameti Agent' },
+    { id: 'p15', committeeId: 'c2', cycleId: 'cy21', memberId: 'm15', memberName: 'Bilal', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 11, 2026', reference: 'TXN-48264', verifiedBy: 'Kameti Agent' },
+    { id: 'p16', committeeId: 'c2', cycleId: 'cy21', memberId: 'm16', memberName: 'Hina', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48265', verifiedBy: 'Kameti Agent' },
+    { id: 'p17', committeeId: 'c2', cycleId: 'cy21', memberId: 'm17', memberName: 'Tariq', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48266', verifiedBy: 'Kameti Agent' },
+    { id: 'p18', committeeId: 'c2', cycleId: 'cy21', memberId: 'm18', memberName: 'Mariam', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48267', verifiedBy: 'Kameti Agent' },
+    { id: 'p19', committeeId: 'c2', cycleId: 'cy21', memberId: 'm19', memberName: 'Faisal', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48268', verifiedBy: 'Kameti Agent' },
+    { id: 'p20', committeeId: 'c2', cycleId: 'cy21', memberId: 'm20', memberName: 'Sadia', expectedAmount: 10000, receivedAmount: 10000, status: 'paid', submittedAt: 'Sep 10, 2026', reference: 'TXN-48269', verifiedBy: 'Kameti Agent' },
+  ],
+  c3: [
+    { id: 'p21', committeeId: 'c3', cycleId: 'cy36', memberId: 'm21', memberName: 'Bilal', expectedAmount: 15000, receivedAmount: 15000, status: 'paid', submittedAt: 'Sep 9, 2026', reference: 'TXN-48310', verifiedBy: 'Kameti Agent' },
+    { id: 'p22', committeeId: 'c3', cycleId: 'cy36', memberId: 'm22', memberName: 'Junaid', expectedAmount: 15000, receivedAmount: 15000, status: 'paid', submittedAt: 'Sep 9, 2026', reference: 'TXN-48311', verifiedBy: 'Kameti Agent' },
+    { id: 'p23', committeeId: 'c3', cycleId: 'cy36', memberId: 'm23', memberName: 'Rabia', expectedAmount: 15000, receivedAmount: 15000, status: 'paid', submittedAt: 'Sep 9, 2026', reference: 'TXN-48312', verifiedBy: 'Kameti Agent' },
+    { id: 'p24', committeeId: 'c3', cycleId: 'cy36', memberId: 'm24', memberName: 'Waqas', expectedAmount: 15000, receivedAmount: 15000, status: 'paid', submittedAt: 'Sep 9, 2026', reference: 'TXN-48313', verifiedBy: 'Kameti Agent' },
+    { id: 'p25', committeeId: 'c3', cycleId: 'cy36', memberId: 'm25', memberName: 'Sana', expectedAmount: 15000, receivedAmount: 15000, status: 'paid', submittedAt: 'Sep 9, 2026', reference: 'TXN-48314', verifiedBy: 'Kameti Agent' },
+    { id: 'p26', committeeId: 'c3', cycleId: 'cy36', memberId: 'm26', memberName: 'Imran', expectedAmount: 15000, receivedAmount: 15000, status: 'paid', submittedAt: 'Sep 9, 2026', reference: 'TXN-48315', verifiedBy: 'Kameti Agent' },
+  ],
+  c4: [
+    { id: 'p27', committeeId: 'c4', cycleId: 'cy43', memberId: 'm27', memberName: 'Nadia', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48401', verifiedBy: 'Kameti Agent' },
+    { id: 'p28', committeeId: 'c4', cycleId: 'cy43', memberId: 'm28', memberName: 'Aslam', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48402', verifiedBy: 'Kameti Agent' },
+    { id: 'p29', committeeId: 'c4', cycleId: 'cy43', memberId: 'm29', memberName: 'Farida', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48403', verifiedBy: 'Kameti Agent' },
+    { id: 'p30', committeeId: 'c4', cycleId: 'cy43', memberId: 'm30', memberName: 'Rashid', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48404', verifiedBy: 'Kameti Agent' },
+    { id: 'p31', committeeId: 'c4', cycleId: 'cy43', memberId: 'm31', memberName: 'Shazia', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 9, 2026', reference: 'TXN-48405', verifiedBy: 'Kameti Agent' },
+    { id: 'p32', committeeId: 'c4', cycleId: 'cy43', memberId: 'm32', memberName: 'Kashif', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48406', verifiedBy: 'Kameti Agent' },
+    { id: 'p33', committeeId: 'c4', cycleId: 'cy43', memberId: 'm33', memberName: 'Naveed', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48407', verifiedBy: 'Kameti Agent' },
+    { id: 'p34', committeeId: 'c4', cycleId: 'cy43', memberId: 'm34', memberName: 'Iram', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48408', verifiedBy: 'Kameti Agent' },
+    { id: 'p35', committeeId: 'c4', cycleId: 'cy43', memberId: 'm35', memberName: 'Nadia Extra', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48409', verifiedBy: 'Kameti Agent' },
+    { id: 'p36', committeeId: 'c4', cycleId: 'cy43', memberId: 'm36', memberName: 'Zubair', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48410', verifiedBy: 'Kameti Agent' },
+    { id: 'p37', committeeId: 'c4', cycleId: 'cy43', memberId: 'm37', memberName: 'Alina', expectedAmount: 5000, receivedAmount: 5000, status: 'paid', submittedAt: 'Sep 8, 2026', reference: 'TXN-48411', verifiedBy: 'Kameti Agent' },
+    { id: 'p38', committeeId: 'c4', cycleId: 'cy43', memberId: 'm38', memberName: 'Danish', expectedAmount: 5000, status: 'pending', notes: 'Awaiting confirmation for this cycle' },
   ],
 };
 
@@ -266,6 +340,22 @@ export const mockRotation: Record<string, RotationEntry[]> = {
   c2: [
     { cycleNumber: 1, memberId: 'm11', memberName: 'Khalid', amount: 100000, status: 'completed', date: 'Jul 2026' },
     { cycleNumber: 2, memberId: 'm12', memberName: 'Sara', amount: 100000, status: 'current', date: 'Aug 2026' },
+  ],
+  c3: [
+    { cycleNumber: 1, memberId: 'm21', memberName: 'Bilal', amount: 90000, status: 'completed', date: 'Mar 2026' },
+    { cycleNumber: 2, memberId: 'm22', memberName: 'Junaid', amount: 90000, status: 'completed', date: 'Apr 2026' },
+    { cycleNumber: 3, memberId: 'm23', memberName: 'Rabia', amount: 90000, status: 'completed', date: 'May 2026' },
+    { cycleNumber: 4, memberId: 'm24', memberName: 'Waqas', amount: 90000, status: 'completed', date: 'Jun 2026' },
+    { cycleNumber: 5, memberId: 'm25', memberName: 'Sana', amount: 90000, status: 'completed', date: 'Jul 2026' },
+    { cycleNumber: 6, memberId: 'm26', memberName: 'Imran', amount: 90000, status: 'completed', date: 'Sep 2026' },
+  ],
+  c4: [
+    { cycleNumber: 1, memberId: 'm27', memberName: 'Nadia', amount: 60000, status: 'completed', date: 'Jul 2026' },
+    { cycleNumber: 2, memberId: 'm28', memberName: 'Aslam', amount: 60000, status: 'completed', date: 'Aug 2026' },
+    { cycleNumber: 3, memberId: 'm35', memberName: 'Nadia Extra', amount: 60000, status: 'current', date: 'Sep 2026' },
+    { cycleNumber: 4, memberId: 'm29', memberName: 'Farida', amount: 60000, status: 'upcoming' },
+    { cycleNumber: 5, memberId: 'm30', memberName: 'Rashid', amount: 60000, status: 'upcoming' },
+    { cycleNumber: 6, memberId: 'm31', memberName: 'Shazia', amount: 60000, status: 'upcoming' },
   ],
 };
 
@@ -431,10 +521,11 @@ export const formatCurrency = (amount: number): string => {
 
 export const formatRelativeTime = (timestamp: string): string => {
   const date = new Date(timestamp);
-  const now = new Date('2026-09-11T11:00:00');
+  const now = new Date();
   const diff = now.getTime() - date.getTime();
   const minutes = Math.floor(diff / 60000);
   const hours = Math.floor(diff / 3600000);
+  if (diff < 0) return 'just now';
   if (minutes < 60) return `${minutes} min ago`;
   if (hours < 24) return `${hours} hr${hours !== 1 ? 's' : ''} ago`;
   return `${Math.floor(hours / 24)} day${Math.floor(hours / 24) !== 1 ? 's' : ''} ago`;
